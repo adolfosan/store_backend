@@ -34,11 +34,17 @@ export const TypeORMQueryParser = createParamDecorator(
     const {query} = request;
     
     let parser: TypeORMParser = {
+        select:[],
         where: {},
         paginate :{ page: 1, limit: 50, route:'' }
     };
     
     let { where} = query;
+    let { select} = query
+
+    if( select) {
+        parser.select = select.split(',');
+    }
 
     if ( query['page'] && parseInt( query['page'])) {
         parser.paginate.page = Number( query['page']);
@@ -60,6 +66,5 @@ export const TypeORMQueryParser = createParamDecorator(
             }
         }  
     }
-    
     return parser;
 });

@@ -7,6 +7,7 @@ interface IPaginate {
 }
 
 export default interface TypeORMParser {
+    select: Array<string>,
     where: Record< string, FindOperator<any>>,
-    paginate: IPaginate
-}
+    paginate: IPaginate,
+}   
