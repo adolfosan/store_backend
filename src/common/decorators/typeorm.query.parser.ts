@@ -1,11 +1,11 @@
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { Not, 
          Equal, 
-         /*LessThan, 
+         LessThan, 
          LessThanOrEqual, 
          MoreThan, 
          MoreThanOrEqual,
-         Like,
+         /*Like,
          ILike,
          Between,
          In,
@@ -16,16 +16,42 @@ import TypeORMParser from '../interfaces/typeorm.query.interface';
 
 const wrapper_operator = new Map();
 
-
 wrapper_operator.set('!=', ( value)=>{
     //console.log('Not FindOperator')
+    //console.log(where => <column>:<operator>:value)
     return Not( value);
 });
 
 wrapper_operator.set('=', (  value)=>{
     //console.log('Equal FindOperator')
+    //console.log(where => <column>:<operator>:value)
     return Equal( value);
 });
+
+wrapper_operator.set('<', (  value)=>{
+    //console.log('LessThan FindOperator')
+    //console.log(where => <column>:<operator>:value)
+    return LessThan( value);
+});
+
+wrapper_operator.set('<=', (  value)=>{
+    //console.log('LessThanOrEqual FindOperator')
+    //console.log(where => <column>:<operator>:value)
+    return LessThanOrEqual( value);
+});
+
+wrapper_operator.set('>', (  value)=>{
+    //console.log('MoreThan FindOperator')
+    //console.log(where => <column>:<operator>:value)
+    return MoreThan( value);
+});
+
+wrapper_operator.set('>=', (  value)=>{
+    //console.log('MoreThanOrEqual FindOperator')
+    //console.log(where => <column>:<operator>:value)
+    return MoreThanOrEqual( value);
+});
+
 
 export const TypeORMQueryParser = createParamDecorator(
     ( data: unknown, ctx: ExecutionContext)=>{

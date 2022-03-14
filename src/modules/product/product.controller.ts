@@ -39,10 +39,7 @@ export class ProductController {
 
   @Get()
   async filter( 
-    @TypeORMQueryParser() parser: TypeORMParser,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
-    @Req() req: Request) {
+    @TypeORMQueryParser() parser: TypeORMParser, @Req() req: Request) {
     
     const route = `http://${req.headers['host']+req.url}`;
     parser.paginate.route = route;
