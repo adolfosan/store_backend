@@ -6,9 +6,9 @@ import { Not,
          MoreThan, 
          MoreThanOrEqual,
          Like,
-         /*ILike,
+         ILike,
          Between,
-         In,
+         /*In,
          Any,
          IsNull*/
         } from 'typeorm'
@@ -94,6 +94,20 @@ wrapper_operator.set('!end_with', (  value)=>{
     return Not( Like( `%${ value}`));
 });
 
+wrapper_operator.set('!end_with', (  value)=>{
+    // Operator NOT LIKE '%value'
+    //console.log('NOT LIKE FindOperator )
+    //console.log(where => <column>:<operator>:value)
+    return Not( Like( `%${ value}`));
+});
+
+wrapper_operator.set('<>', (  value)=>{
+    //console.log('Between FindOperator')
+    //console.log(where => <column>:<operator>:value)
+    let split = value.split('-');
+    const [ from, to] = split;
+    return Between( from, to);
+});
 
 export const TypeORMQueryParser = createParamDecorator(
     ( data: unknown, ctx: ExecutionContext)=>{
@@ -132,7 +146,9 @@ export const TypeORMQueryParser = createParamDecorator(
             const split = where[idx].split(':');
             if( split.length == 3) {
                 const [key, operator, payload] = split;
-                parser.where[key] = wrapper_operator.get(operator)( payload);
+                if( wrapper_operator.has( operator)) {
+                    parser.where[key] = wrapper_operator.get(operator)( payload);
+                }
             }
         }  
     }
