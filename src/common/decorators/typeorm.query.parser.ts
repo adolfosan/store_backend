@@ -36,11 +36,13 @@ export const TypeORMQueryParser = createParamDecorator(
     let parser: TypeORMParser = {
         select:[],
         where: {},
-        paginate :{ page: 1, limit: 50, route:'' }
+        paginate :{ page: 1, limit: 50, route:'' },
+        sort: {}
     };
     
     let { where} = query;
-    let { select} = query
+    let { select} = query;
+    let { sort} = query;
 
     if( select) {
         parser.select = select.split(',');
@@ -66,5 +68,20 @@ export const TypeORMQueryParser = createParamDecorator(
             }
         }  
     }
+
+    if( sort) {
+        if( typeof( sort) == 'string') {
+            sort = [sort];
+        }
+        for(  const idx in sort) {
+            
+            const split = sort[idx].split(':');
+            if( split.length == 2) {
+                const [key, order] = split;
+                parser.sort[key] = order;
+            }
+        }  
+    }
+
     return parser;
 });

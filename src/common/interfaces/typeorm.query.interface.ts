@@ -1,4 +1,4 @@
-import { FindOperator } from "typeorm";
+import { FindOperator, OrderByCondition } from "typeorm";
 
 interface IPaginate {
     page: number,
@@ -10,4 +10,5 @@ export default interface TypeORMParser {
     select: Array<string>,
     where: Record< string, FindOperator<any>>,
     paginate: IPaginate,
+    sort: OrderByCondition
 }   
