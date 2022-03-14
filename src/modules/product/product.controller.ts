@@ -57,15 +57,24 @@ export class ProductController {
     return this.productService.update(+id, updateProductDto);
   }
 
+  @Delete()
+  async deleteByQuery( @TypeORMQueryParser() parser: TypeORMParser, @Res() res: Response) {
+    try {
+      let r = await this.productService.deleteByQuery( parser);
+      return res.status(HttpStatus.ACCEPTED).json(r.affected);
+    } catch ( err) {
+      
+    }
+  }
+
   @Delete(':id')
-  async remove(@Param('id') id: string, @Res() res: Response)  {
-    
+  async deleteByID(@Param('id') id: string, @Res() res: Response)  {
     if( !uuid.validate( id)) {
       throw new HttpException('product:id:notvalid',HttpStatus.BAD_REQUEST);
     }
 
     try {
-      let r: DeleteResult = await this.productService.remove( id);
+      let r: DeleteResult = await this.productService.deleteById( id);
       if( r.affected == 0) {
         throw new HttpException('product:id:notfound', HttpStatus.BAD_REQUEST);
       }

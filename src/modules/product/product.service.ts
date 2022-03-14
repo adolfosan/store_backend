@@ -1,6 +1,6 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { PRODUCT_REPOSITORY } from 'src/common/constants/database.constants';
-import { Equal, Not, Repository, TypeORMError } from 'typeorm';
+import { DeleteResult, Equal, Not, Repository, TypeORMError } from 'typeorm';
 import { Product } from '../database/entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -55,11 +55,20 @@ export class ProductService {
     return `This action updates a #${id} product`;
   }
 
-  async remove(id){
+  async deleteById(id): Promise<DeleteResult>{
     try {
       let r = await this.repository.delete({
         id: id
       })
+      return r;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteByQuery( parser: TypeORMParser): Promise<DeleteResult> {
+    try {
+      let r = await this.repository.delete( parser.where);
       return r;
     } catch (error) {
       throw error;
