@@ -32,7 +32,7 @@ export class ProductService {
   async filter(parser: TypeORMParser ): Promise< Pagination<Product>>{
     try {
       const queryBuilder = this.repository.createQueryBuilder('p');
-      
+      queryBuilder.where( parser.where);
       return  paginate<Product>( queryBuilder, parser.paginate);
     } catch( err) {
       if( err instanceof TypeORMError) {
