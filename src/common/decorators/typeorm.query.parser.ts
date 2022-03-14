@@ -8,8 +8,8 @@ import { Not,
          Like,
          ILike,
          Between,
-         /*In,
-         Any,
+         In,
+         /*Any,
          IsNull*/
         } from 'typeorm'
 import TypeORMParser from '../interfaces/typeorm.query.interface';
@@ -94,19 +94,18 @@ wrapper_operator.set('!end_with', (  value)=>{
     return Not( Like( `%${ value}`));
 });
 
-wrapper_operator.set('!end_with', (  value)=>{
-    // Operator NOT LIKE '%value'
-    //console.log('NOT LIKE FindOperator )
-    //console.log(where => <column>:<operator>:value)
-    return Not( Like( `%${ value}`));
-});
-
 wrapper_operator.set('<>', (  value)=>{
     //console.log('Between FindOperator')
     //console.log(where => <column>:<operator>:value)
     let split = value.split('-');
     const [ from, to] = split;
     return Between( from, to);
+});
+
+wrapper_operator.set('in', (  value)=>{
+    //console.log('IN FindOperator')
+    //console.log(where => <column>:<operator>:value)
+    return In( value.split(','));
 });
 
 export const TypeORMQueryParser = createParamDecorator(
