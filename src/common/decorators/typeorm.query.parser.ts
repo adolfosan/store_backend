@@ -5,8 +5,8 @@ import { Not,
          LessThanOrEqual, 
          MoreThan, 
          MoreThanOrEqual,
-         /*Like,
-         ILike,
+         Like,
+         /*ILike,
          Between,
          In,
          Any,
@@ -52,11 +52,53 @@ wrapper_operator.set('>=', (  value)=>{
     return MoreThanOrEqual( value);
 });
 
+wrapper_operator.set('contains', (  value)=>{
+    // Operator LIKE '%value%'
+    //console.log('LIKE FindOperator )
+    //console.log(where => <column>:<operator>:value)
+    return Like( `%${ value}%`);
+});
+
+wrapper_operator.set('start_with', (  value)=>{
+    // Operator LIKE 'value%'
+    //console.log('LIKE FindOperator )
+    //console.log(where => <column>:<operator>:value)
+    return Like( `${value}%`);
+});
+
+wrapper_operator.set('end_with', (  value)=>{
+    // Operator LIKE '%value'
+    //console.log('LIKE FindOperator )
+    //console.log(where => <column>:<operator>:value)
+    return Like( `%${ value}`);
+});
+
+wrapper_operator.set('!contains', (  value)=>{
+    // Operator NOT LIKE '%value%'
+    //console.log(' NOT LIKE FindOperator )
+    //console.log(where => <column>:<operator>:value)
+    return Not( Like( `%${ value}%`));
+});
+
+wrapper_operator.set('!start_with', (  value)=>{
+    // Operator NOT LIKE 'value%'
+    //console.log('NOT LIKE FindOperator )
+    //console.log(where => <column>:<operator>:value)
+    return Not( Like( `${value}%`));
+});
+
+wrapper_operator.set('!end_with', (  value)=>{
+    // Operator NOT LIKE '%value'
+    //console.log('NOT LIKE FindOperator )
+    //console.log(where => <column>:<operator>:value)
+    return Not( Like( `%${ value}`));
+});
+
 
 export const TypeORMQueryParser = createParamDecorator(
     ( data: unknown, ctx: ExecutionContext)=>{
     
-        const request = ctx.switchToHttp().getRequest();
+    const request = ctx.switchToHttp().getRequest();
     const {query} = request;
     
     let parser: TypeORMParser = {
