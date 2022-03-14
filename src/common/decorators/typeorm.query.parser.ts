@@ -19,14 +19,12 @@ const wrapper_operator = new Map();
 
 wrapper_operator.set('!=', ( value)=>{
     //console.log('Not FindOperator')
-    //parser.where[field] = Not( value);
     return Not( value);
 });
 
 wrapper_operator.set('=', (  value)=>{
     //console.log('Equal FindOperator')
-    //parser.where[field] = Equal( value);
-        return Equal( value);
+    return Equal( value);
 });
 
 export const TypeORMQueryParser = createParamDecorator(
@@ -37,7 +35,7 @@ export const TypeORMQueryParser = createParamDecorator(
     
     let parser: TypeORMParser = {
         where: {},
-        paginate :{ page: 1, limit: 50 }
+        paginate :{ page: 1, limit: 50, route:'' }
     };
     
     const { paginate } = query;
@@ -60,10 +58,8 @@ export const TypeORMQueryParser = createParamDecorator(
             if( split.length == 3) {
                 const [key, operator, payload] = split;
                 parser.where[key] = wrapper_operator.get(operator)( payload);
-                //wrapper_operator.get(operator)(parser, key, payload);
-                //console.log(`${key} ${operator} ${payload}`);
             }
         }  
     }
-    console.log( parser);
+    return parser;
 });

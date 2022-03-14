@@ -29,14 +29,11 @@ export class ProductService {
     }
   }
 
-  async filter(parser: TypeORMParser , options:IPaginationOptions): Promise< Pagination<Product>>{
+  async filter(parser: TypeORMParser ): Promise< Pagination<Product>>{
     try {
       const queryBuilder = this.repository.createQueryBuilder('p');
-      //queryBuilder.select('p.id');
-      console.log( parser.where);
-      //queryBuilder.where();
       
-      return  paginate<Product>( queryBuilder, options);
+      return  paginate<Product>( queryBuilder, parser.paginate);
     } catch( err) {
       if( err instanceof TypeORMError) {
         console.log('asasasasasasas');

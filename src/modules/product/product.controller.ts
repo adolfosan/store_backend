@@ -45,12 +45,9 @@ export class ProductController {
     @Req() req: Request) {
     
     const route = `http://${req.headers['host']+req.url}`;
-    limit = limit > 100 ? 100 : limit;
-    return await this.productService.filter(parser, {
-      page,
-      limit,
-      route: route
-    });
+    parser.paginate.route = route;
+
+    return await this.productService.filter(parser);
   }
 
   @Get(':id')

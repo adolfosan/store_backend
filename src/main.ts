@@ -10,6 +10,6 @@ async function bootstrap() {
   app.use( compression());
   app.use( bodyParser.urlencoded({ extended: true}));
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  await app.listen(17000);
+  await app.listen(3000);
 }
 bootstrap();
