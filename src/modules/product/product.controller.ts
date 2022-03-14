@@ -22,6 +22,7 @@ import * as uuid from 'uuid'
 import { Pagination } from 'nestjs-typeorm-paginate';
 import { TypeORMQueryParser } from 'src/common/decorators/typeorm.query.parser';
 import TypeORMParser from 'src/common/interfaces/typeorm.query.interface';
+import { DATABASE_CONNECTION } from 'src/common/constants/database.constants';
 
 @Controller('product')
 export class ProductController {
@@ -39,7 +40,12 @@ export class ProductController {
 
   @Get()
   async filter( 
-    @TypeORMQueryParser() parser: TypeORMParser, @Req() req: Request) {
+    @TypeORMQueryParser(
+      { 
+        connectionName: DATABASE_CONNECTION,
+        tableName: 'product',
+        ignoredColumns:['created_at','updated_at']
+      }) parser: TypeORMParser, @Req() req: Request) {
     
     const route = `http://${req.headers['host']+req.url}`;
     parser.paginate.route = route;

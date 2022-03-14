@@ -9,6 +9,7 @@ export const databaseProvider = {
     useFactory: async function(){
         try {
             const connection = await createConnection({
+            name: DATABASE_CONNECTION,
             type: "postgres",
             host: process.env.HOST,
             port: Number(process.env.PORT),

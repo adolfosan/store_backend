@@ -1,4 +1,4 @@
-import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { createParamDecorator, ExecutionContext, HttpException, HttpStatus, Inject } from '@nestjs/common';
 import { Not, 
          Equal, 
          LessThan, 
@@ -9,8 +9,14 @@ import { Not,
          ILike,
          Between,
          In,
-         IsNull
+         IsNull,
+         getRepository,
+         Connection,
+         getConnection,
+         ConnectionNotFoundError,
+         EntityMetadataNotFoundError
         } from 'typeorm'
+import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
 import TypeORMParser from '../interfaces/typeorm.query.interface';
 
 const wrapper_operator = new Map();
@@ -113,10 +119,41 @@ wrapper_operator.set('null', (  value)=>{
     return IsNull();
 });
 
+interface IDataParserDecorator {
+    connectionName: string, //nombre de la conexion
+    tableName: string, //nombre de la tabla
+    ignoredColumns: Array<string> //columna a ignorar en el parser
+}
+
 export const TypeORMQueryParser = createParamDecorator(
-    ( data: unknown, ctx: ExecutionContext)=>{
+    async ( data: IDataParserDecorator, ctx: ExecutionContext)=>{
+    try {
+        const connection = await getConnection( data.connectionName);
+        
+        const columns: Array<string> = connection.getMetadata( data.tableName).ownColumns.filter(( cl)=>{
+            return !data.ignoredColumns.includes(cl.databaseName);
+        }).map( cl => cl.databaseName);
+
+        
+        let parser: TypeORMParser = {
+            select:[],
+            where: {},
+            paginate :{ page: 1, limit: 50, route:'' },
+            sort: {}
+        };
+        return parser    
+    } catch (error) {
+        console.log( error);
+        if( error instanceof ConnectionNotFoundError) {
+            throw new HttpException( error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        if( error instanceof EntityMetadataNotFoundError) {
+            throw new HttpException( error.message, HttpStatus.NOT_FOUND);
+        }
+    }
     
-    const request = ctx.switchToHttp().getRequest();
+
+    /*const request = ctx.switchToHttp().getRequest();
     const {query} = request;
     
     let parser: TypeORMParser = {
@@ -171,5 +208,5 @@ export const TypeORMQueryParser = createParamDecorator(
         }  
     }
 
-    return parser;
+    return parser;*/
 });

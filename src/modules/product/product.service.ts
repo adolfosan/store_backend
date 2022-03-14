@@ -1,6 +1,6 @@
 import { HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { PRODUCT_REPOSITORY } from 'src/common/constants/database.constants';
-import { DeleteResult, Equal, Not, Repository, TypeORMError } from 'typeorm';
+import { DATABASE_CONNECTION, PRODUCT_REPOSITORY } from 'src/common/constants/database.constants';
+import { Connection, DeleteResult, Equal, getRepository, Not, Repository, TypeORMError } from 'typeorm';
 import { Product } from '../database/entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -16,7 +16,7 @@ export class ProductService {
 
   constructor ( 
     @Inject( PRODUCT_REPOSITORY) private repository: Repository< Product>) {
-
+    
   }
 
   async create(createProductDto: CreateProductDto): Promise< Product>{
@@ -31,10 +31,10 @@ export class ProductService {
 
   async filter(parser: TypeORMParser ): Promise< Pagination<Product>>{
     try {
-      const queryBuilder = this.repository.createQueryBuilder('p');
+      const queryBuilder = this.repository.createQueryBuilder();
       
       if( parser.select.length != 0) {
-        parser.select = parser.select.map( v=> 'p.'+v);
+        //parser.select = parser.select.map( v=> 'p.'+v);
         queryBuilder.select(parser.select);
       }
       queryBuilder.where( parser.where);
