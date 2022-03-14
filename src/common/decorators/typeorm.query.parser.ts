@@ -9,8 +9,7 @@ import { Not,
          ILike,
          Between,
          In,
-         /*Any,
-         IsNull*/
+         IsNull
         } from 'typeorm'
 import TypeORMParser from '../interfaces/typeorm.query.interface';
 
@@ -106,6 +105,12 @@ wrapper_operator.set('in', (  value)=>{
     //console.log('IN FindOperator')
     //console.log(where => <column>:<operator>:value)
     return In( value.split(','));
+});
+
+wrapper_operator.set('null', (  value)=>{
+    //console.log('NUll FindOperator')
+    //console.log(where => <column>:<operator>:value)
+    return IsNull();
 });
 
 export const TypeORMQueryParser = createParamDecorator(
