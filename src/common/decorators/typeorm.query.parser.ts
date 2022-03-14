@@ -38,15 +38,14 @@ export const TypeORMQueryParser = createParamDecorator(
         paginate :{ page: 1, limit: 50, route:'' }
     };
     
-    const { paginate } = query;
     let { where} = query;
 
-    if( paginate) {
-        const split = paginate.split(':');
-        if( parseInt( split[0]) && parseInt( split[1])) {
-            parser.paginate.page = Number(split[0]);
-            parser.paginate.limit = Number(split[1]);
-        }
+    if ( query['page'] && parseInt( query['page'])) {
+        parser.paginate.page = Number( query['page']);
+    }
+
+    if ( query['limit'] && parseInt( query['limit'])) {
+        parser.paginate.limit = Number( query['limit']);
     }
 
     if( where){
@@ -61,5 +60,6 @@ export const TypeORMQueryParser = createParamDecorator(
             }
         }  
     }
+    
     return parser;
 });
