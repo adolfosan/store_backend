@@ -17,6 +17,7 @@ import { Not,
          EntityMetadataNotFoundError
         } from 'typeorm'
 import { ColumnMetadata } from 'typeorm/metadata/ColumnMetadata';
+import QueryParserException from '../exceptions/query.parser.exception';
 import TypeORMParser from '../interfaces/typeorm.query.interface';
 
 const wrapper_operator = new Map();
@@ -102,10 +103,10 @@ function analyzeSelect ( query: any , columns: Array< string>, parser: TypeORMPa
         })
         if( invalidColumns.length != 0) {
             error = {
-                select: {
-                    message: 'column:notfound',
+                //select: {
+                    message: 'select:column:notfound',
                     args: { columns: invalidColumns.join(',')}
-                }
+                //}
             }
         } 
     }
@@ -153,16 +154,16 @@ function analyzeWhere ( query: any , columns: Array< string>, parser: TypeORMPar
         }
         
         if( hasInvalidColumns) {
-            let message = 'column:notfound';
+            let message = 'where:column:notfound';
             
             if( invalidColumns.length != 1)
-                message = 'columns:notfound';
+                message = 'where:columns:notfound';
             
                 error = {
-                    where: {
+                    //where: {
                         message: message,
                         args: { columns: invalidColumns.join(',')}
-                    }
+                    //}
                 }
         }
         
@@ -173,7 +174,9 @@ function analyzeWhere ( query: any , columns: Array< string>, parser: TypeORMPar
 
 export const TypeORMQueryParser = createParamDecorator(
     async ( data: IDataParserDecorator, ctx: ExecutionContext)=>{
-    let queryParserError: QueryParserError;
+    //let queryParserError: QueryParserError;
+    let hasError: boolean = false;
+    let exception = new QueryParserException();
     try {
         const connection = await getConnection( data.connectionName);
         const columns: Array<string> = connection.getMetadata( data.tableName).ownColumns.filter(( cl)=> {
@@ -193,16 +196,21 @@ export const TypeORMQueryParser = createParamDecorator(
 
         const errSelect = analyzeSelect( query, columns, parser);
         if( errSelect) {
-            queryParserError = { ...queryParserError, ...errSelect};
+            /*queryParserError = { ...queryParserError, ...errSelect};
+            console.log( errSelect);*/
+            hasError = true;
+            exception.select = errSelect;
         }
 
         const errWhere = analyzeWhere( query, columns, parser);
         if( errWhere) {
-            queryParserError = { ...queryParserError, ...errWhere};
+            //queryParserError = { ...queryParserError, ...errWhere};
+            hasError = true;
+            exception.where = errWhere;
         }
 
-        if( queryParserError){
-            throw new Error();
+        if( hasError){
+            throw exception;
         }
         
         return parser; 
@@ -214,8 +222,8 @@ export const TypeORMQueryParser = createParamDecorator(
         if( error instanceof EntityMetadataNotFoundError) {
             throw new HttpException( error.message, HttpStatus.NOT_FOUND);
         }
-        
-        throw new HttpException( queryParserError, HttpStatus.BAD_REQUEST);
+        //console.log( queryParserError);
+        throw exception;
     }
     
    

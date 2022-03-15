@@ -11,7 +11,8 @@ import { Controller,
          ParseIntPipe, 
          Query, 
          Request,
-         Req } from '@nestjs/common';
+         Req, 
+         UseFilters} from '@nestjs/common';
 
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -23,6 +24,7 @@ import { Pagination } from 'nestjs-typeorm-paginate';
 import { TypeORMQueryParser } from 'src/common/decorators/typeorm.query.parser';
 import TypeORMParser from 'src/common/interfaces/typeorm.query.interface';
 import { DATABASE_CONNECTION } from 'src/common/constants/database.constants';
+import { QueryParserExceptionFilter } from 'src/common/filters/query.parser.exception.filter';
 
 @Controller('product')
 export class ProductController {
@@ -39,6 +41,7 @@ export class ProductController {
   }
 
   @Get()
+  @UseFilters( new QueryParserExceptionFilter())
   async filter( 
     @TypeORMQueryParser(
       { 
@@ -64,6 +67,7 @@ export class ProductController {
   }
 
   @Delete()
+  @UseFilters( new QueryParserExceptionFilter())
   async deleteByQuery( 
     @TypeORMQueryParser({ 
       connectionName: DATABASE_CONNECTION,
