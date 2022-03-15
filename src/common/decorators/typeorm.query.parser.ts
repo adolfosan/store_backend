@@ -134,8 +134,7 @@ function analyzeWhere ( query: any , columns: Array< string>, parser: TypeORMPar
             where = [where];
         }
         let hasInvalidColumns: boolean = false;
-        let invalidColumns: Array< string>;
-
+        let invalidColumns: Array< string> = [];
         for(  const idx in where) {
             const split = where[idx].split(':');
             if( split.length == 3) {
@@ -151,6 +150,20 @@ function analyzeWhere ( query: any , columns: Array< string>, parser: TypeORMPar
                     parser.where[cl] = wrapper_operator.get(operator)( payload);
                 }
             }
+        }
+        
+        if( hasInvalidColumns) {
+            let message = 'column:notfound';
+            
+            if( invalidColumns.length != 1)
+                message = 'columns:notfound';
+            
+                error = {
+                    where: {
+                        message: message,
+                        args: { columns: invalidColumns.join(',')}
+                    }
+                }
         }
         
     }
@@ -188,9 +201,10 @@ export const TypeORMQueryParser = createParamDecorator(
             queryParserError = { ...queryParserError, ...errWhere};
         }
 
-        /*if( queryParserError){
+        if( queryParserError){
             throw new Error();
-        }*/
+        }
+        
         return parser; 
     } catch (error) {
         
@@ -200,7 +214,7 @@ export const TypeORMQueryParser = createParamDecorator(
         if( error instanceof EntityMetadataNotFoundError) {
             throw new HttpException( error.message, HttpStatus.NOT_FOUND);
         }
-
+        
         throw new HttpException( queryParserError, HttpStatus.BAD_REQUEST);
     }
     
