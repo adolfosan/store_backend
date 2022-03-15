@@ -64,7 +64,12 @@ export class ProductController {
   }
 
   @Delete()
-  async deleteByQuery( @TypeORMQueryParser() parser: TypeORMParser, @Res() res: Response) {
+  async deleteByQuery( 
+    @TypeORMQueryParser({ 
+      connectionName: DATABASE_CONNECTION,
+      tableName: 'product',
+      ignoredColumns:['created_at','updated_at']
+    }) parser: TypeORMParser, @Res() res: Response) {
     try {
       let r = await this.productService.deleteByQuery( parser);
       return res.status(HttpStatus.ACCEPTED).json(r.affected);
@@ -73,9 +78,14 @@ export class ProductController {
     }
   }
 
-  @Delete(':id')
+  @Delete('id/:id')
   async deleteByID(@Param('id') id: string, @Res() res: Response)  {
     if( !uuid.validate( id)) {
+      throw new HttpException( {
+        action:'delete_products_by_id',
+        message:'id:notvalid',
+        args:{ }
+      }, HttpStatus.BAD_REQUEST);
       throw new HttpException('product:id:notvalid',HttpStatus.BAD_REQUEST);
     }
 
@@ -88,5 +98,45 @@ export class ProductController {
     } catch( err) {
       throw err;
     }
+  }
+
+  @Delete('ids/:ids')
+  async deleteByIDS(@Param('ids') ids: string, @Res() res: Response)  {
+    let listIds: Array< string> = ids.split(',');
+    let invalidIds = listIds.filter( ( value)=> {
+      return !uuid.validate( value);
+    });
+    
+    if( invalidIds.length != 0) {
+      throw new HttpException( {
+        action:'delete_products_by_list_id',
+        message:'ids:notvalid',
+        args:{
+          notvalidCount: invalidIds.length,
+          totalCount: listIds.length
+        }
+      }, HttpStatus.BAD_REQUEST);
+    }
+    try {
+      let r = await this.productService.deleteByIds( listIds);
+      return res.status( HttpStatus.ACCEPTED).send(r);
+    } catch (err) {
+      console.log( err);
+    }
+    
+    
+    /*if( !uuid.validate( id)) {
+      throw new HttpException('product:id:notvalid',HttpStatus.BAD_REQUEST);
+    }
+
+    try {
+      let r: DeleteResult = await this.productService.deleteById( id);
+      if( r.affected == 0) {
+        throw new HttpException('product:id:notfound', HttpStatus.BAD_REQUEST);
+      }
+      return  res.status( HttpStatus.ACCEPTED).send('asas');
+    } catch( err) {
+      throw err;
+    }*/
   }
 }
