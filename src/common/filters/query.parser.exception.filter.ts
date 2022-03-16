@@ -7,10 +7,14 @@ export class QueryParserExceptionFilter implements ExceptionFilter {
   catch(exception: QueryParserException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
-    console.log( exception.select);
+    /*console.log( exception.select);
     console.log( exception.where);
-    /*const statusCode = exception.getStatus();
+    const statusCode = exception.getStatus();
     const message = exception.getResponse() as Record< string, any>*/
+    for( const e of exception.errors) {
+      const { message , args} = e;
+      console.log( message +' '+ JSON.stringify( args));
+    }
     return response.status( 404).json({ msg:'hello world'});
   }
 }

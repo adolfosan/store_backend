@@ -103,10 +103,8 @@ function analyzeSelect ( query: any , columns: Array< string>, parser: TypeORMPa
         })
         if( invalidColumns.length != 0) {
             error = {
-                //select: {
-                    message: 'select:column:notfound',
-                    args: { columns: invalidColumns.join(',')}
-                //}
+                message: 'select:column:notfound',
+                args: { columns: invalidColumns.join(',')}
             }
         } 
     }
@@ -116,20 +114,7 @@ function analyzeSelect ( query: any , columns: Array< string>, parser: TypeORMPa
 function analyzeWhere ( query: any , columns: Array< string>, parser: TypeORMParser) {
     let { where} = query;
     let error = null;
-        /*let columnsFromQuery = select.split(',');
-        let invalidColumns: Array<string> = columnsFromQuery.filter( value =>{
-            return columns.indexOf( value) == -1;
-        })
-        if( invalidColumns.length != 0) {
-            error = {
-                select: {
-                    message: 'column:notfound',
-                    args: { columns: invalidColumns.join(',')}
-                }
-            }
-        } else {
-            parser.select = columnsFromQuery;
-        }*/
+
     if( where){
         if( typeof( where) == 'string') {
             where = [where];
@@ -147,7 +132,6 @@ function analyzeWhere ( query: any , columns: Array< string>, parser: TypeORMPar
                 }
                 
                 if( !hasInvalidColumns && wrapper_operator.has( operator)) {
-                    //console.log(`${ cl} ${ operator} ${ payload}`);
                     parser.where[cl] = wrapper_operator.get(operator)( payload);
                 }
             }
@@ -160,10 +144,8 @@ function analyzeWhere ( query: any , columns: Array< string>, parser: TypeORMPar
                 message = 'where:columns:notfound';
             
                 error = {
-                    //where: {
                         message: message,
                         args: { columns: invalidColumns.join(',')}
-                    //}
                 }
         }
         
@@ -174,13 +156,11 @@ function analyzeWhere ( query: any , columns: Array< string>, parser: TypeORMPar
 
 export const TypeORMQueryParser = createParamDecorator(
     async ( data: IDataParserDecorator, ctx: ExecutionContext)=>{
-    //let queryParserError: QueryParserError;
     let hasError: boolean = false;
     let exception = new QueryParserException();
     try {
         const connection = await getConnection( data.connectionName);
         const columns: Array<string> = connection.getMetadata( data.tableName).ownColumns.filter(( cl)=> {
-            //console.log( cl.databaseName+' '+cl.type);
             return !data.ignoredColumns.includes(cl.databaseName);
         }).map( cl => cl.databaseName);
 
@@ -196,17 +176,14 @@ export const TypeORMQueryParser = createParamDecorator(
 
         const errSelect = analyzeSelect( query, columns, parser);
         if( errSelect) {
-            /*queryParserError = { ...queryParserError, ...errSelect};
-            console.log( errSelect);*/
             hasError = true;
-            exception.select = errSelect;
+            exception.addError(errSelect);
         }
 
         const errWhere = analyzeWhere( query, columns, parser);
         if( errWhere) {
-            //queryParserError = { ...queryParserError, ...errWhere};
             hasError = true;
-            exception.where = errWhere;
+            exception.addError(errWhere);
         }
 
         if( hasError){
@@ -225,62 +202,4 @@ export const TypeORMQueryParser = createParamDecorator(
         //console.log( queryParserError);
         throw exception;
     }
-    
-   
-    /*const request = ctx.switchToHttp().getRequest();
-    const {query} = request;
-    
-    let parser: TypeORMParser = {
-        select:[],
-        where: {},
-        paginate :{ page: 1, limit: 50, route:'' },
-        sort: {}
-    };
-    
-    let { where} = query;
-    let { select} = query;
-    let { sort} = query;
-
-    if( select) {
-        parser.select = select.split(',');
-    }
-
-    if ( query['page'] && parseInt( query['page'])) {
-        parser.paginate.page = Number( query['page']);
-    }
-
-    if ( query['limit'] && parseInt( query['limit'])) {
-        parser.paginate.limit = Number( query['limit']);
-    }
-
-    if( where){
-        if( typeof( where) == 'string') {
-            where = [where];
-        }
-        for(  const idx in where) {
-            const split = where[idx].split(':');
-            if( split.length == 3) {
-                const [key, operator, payload] = split;
-                if( wrapper_operator.has( operator)) {
-                    parser.where[key] = wrapper_operator.get(operator)( payload);
-                }
-            }
-        }  
-    }
-
-    if( sort) {
-        if( typeof( sort) == 'string') {
-            sort = [sort];
-        }
-        for(  const idx in sort) {
-            
-            const split = sort[idx].split(':');
-            if( split.length == 2) {
-                const [key, order] = split;
-                parser.sort[key] = order;
-            }
-        }  
-    }
-
-    return parser;*/
 });

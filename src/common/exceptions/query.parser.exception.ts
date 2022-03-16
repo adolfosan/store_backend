@@ -1,23 +1,13 @@
 
 
 export default class QueryParserException extends Error {
-    private _select: any = null;
-    private _where: any = null;
+    private _errors: Array< Record< string, any>> =[];
     
-    public get select() { 
-        return this._select
-    };
-
-    public set select( select: any){
-        this._select = select;
+    public get errors() {
+        return this._errors;
     }
-
-    public get where() { 
-        return this._where
-    };
-
-    public set where( where: any){
-        this._where = where;
+    
+    public addError( err: Record< string, any>) {
+        this._errors.push( err);
     }
-
 }
