@@ -114,7 +114,9 @@ function analyzeSelect ( query: any , columns: Array< string>, parser: TypeORMPa
 function analyzeWhere ( query: any , columns: Array< string>, parser: TypeORMParser) {
     let { where} = query;
     let error = null;
-
+    // me cuadra el formato: <columna>_<operator>=<value> ,ejemplo: name_startwith=ad
+    console.log( Array.from(wrapper_operator.keys()));
+    console.log( Array.from(wrapper_operator.keys()).length);
     if( where){
         if( typeof( where) == 'string') {
             where = [where];
