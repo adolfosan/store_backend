@@ -39,11 +39,9 @@ export class ProductService {
       }
       queryBuilder.where( parser.where);
       queryBuilder.orderBy( parser.sort);
-      return  paginate<Product>( queryBuilder, parser.paginate);
+      return  await paginate<Product>( queryBuilder, parser.paginate);
     } catch( err) {
-      if( err instanceof TypeORMError) {
-        console.log('asasasasasasas');
-      }
+      console.log( err);
     }
   }
   
