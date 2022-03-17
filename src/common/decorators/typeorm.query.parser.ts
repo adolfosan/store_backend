@@ -92,7 +92,7 @@ interface IDataParserDecorator {
 
 type QueryParserError = Record< string, any>;
 
-function analyzeSelect ( query: any , columns: Array< string>, parser: TypeORMParser) {
+function analyzeSelect (entity: string, query: any , columns: Array< string>, parser: TypeORMParser) {
     let { select} = query;
     let error = null;
     if( select) {
@@ -111,20 +111,17 @@ function analyzeSelect ( query: any , columns: Array< string>, parser: TypeORMPa
     return error;
 }
 
-function analyzeWhere ( query: any , columns: Array< string>, parser: TypeORMParser) {
+function analyzeWhere (entity: string, query: any , columns: Array< string>, parser: TypeORMParser) {
     let { where} = query;
     let error = null;
-    // me cuadra el formato: <columna>_<operator>=<value> ,ejemplo: name_startwith=ad
-    /*console.log( Array.from(wrapper_operator.keys()));
-    console.log( Array.from(wrapper_operator.keys()).length);*/
-    let operators = [ ...wrapper_operator.keys()];
+    
     if( where){
         if( typeof( where) == 'string') {
             where = [where];
         }
-        let hasInvalidColumns: boolean = false;
+        /*let hasInvalidColumns: boolean = false;
         let invalidColumns: Array< string> = [];
-        /*for(  const idx in where) {
+        for(  const idx in where) {
             const split = where[idx].split(':');
             if( split.length == 3) {
                 const [cl, operator, payload] = split;
@@ -152,6 +149,7 @@ function analyzeWhere ( query: any , columns: Array< string>, parser: TypeORMPar
         }
         */
         //console.log(`(?<column>\\w+)_(?<operator>${operators.join('|')})=(?<value>\\w+)`)
+        let operators = [ ...wrapper_operator.keys()];
         let reg = new RegExp(`^(?<column>\\w+)_(?<operator>${operators.join('|')})(=(?<value>\\w+))?$`,'i');
         
         for( let w of where) {
@@ -162,14 +160,18 @@ function analyzeWhere ( query: any , columns: Array< string>, parser: TypeORMPar
                 if( !columns.includes( column)) {
                     error = {
                         message: 'where:column:notfound',
-                        args: { column: column}
+                        args: { 
+                            entity: entity,
+                            column: column
+                        }
                     }
                     break;
                 } else if( value == undefined && operator != 'null')  {   
                     error = {
-                        message: 'where:query:format:notvalid',
-                        args: {}
-                    }   
+                        message: 'where:query:undefined:value',
+                        args: { }
+                    }
+                    break;   
                 } else {
                     parser.where[column] = wrapper_operator.get(operator)( value);
                 }
@@ -178,6 +180,7 @@ function analyzeWhere ( query: any , columns: Array< string>, parser: TypeORMPar
                     message: 'where:query:format:notvalid',
                     args: {}
                 }
+                break;
             }
         }
     }    
@@ -204,13 +207,13 @@ export const TypeORMQueryParser = createParamDecorator(
         const request = ctx.switchToHttp().getRequest();
         const {query} = request;
 
-        const errSelect = analyzeSelect( query, columns, parser);
+        const errSelect = analyzeSelect(data.tableName ,query, columns, parser);
         if( errSelect) {
             hasError = true;
             exception.addError(errSelect);
         }
 
-        const errWhere = analyzeWhere( query, columns, parser);
+        const errWhere = analyzeWhere(data.tableName, query, columns, parser);
         if( errWhere) {
             hasError = true;
             exception.addError(errWhere);
