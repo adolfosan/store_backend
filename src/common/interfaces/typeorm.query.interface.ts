@@ -7,6 +7,8 @@ interface IPaginate {
 }
 
 export default interface TypeORMParser {
+    schema?: string,
+    table?: string,
     select: Array<string>,
     where: Record< string, FindOperator<any>>,
     paginate: IPaginate,
