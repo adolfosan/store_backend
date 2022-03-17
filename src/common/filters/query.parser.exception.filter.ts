@@ -13,8 +13,8 @@ export class QueryParserExceptionFilter implements ExceptionFilter {
     const message = exception.getResponse() as Record< string, any>*/
     for( const e of exception.errors) {
       const { message , args} = e;
-      console.log( message +' '+ JSON.stringify( args));
+      console.log( e);
     }
-    return response.status( 404).json({ msg:'hello world'});
+    return response.status( 404).json(exception.errors);
   }
 }

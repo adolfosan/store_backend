@@ -22,27 +22,27 @@ import TypeORMParser from '../interfaces/typeorm.query.interface';
 
 const wrapper_operator = new Map();
 
-wrapper_operator.set('!=', ( value)=>{
+wrapper_operator.set('not', ( value)=>{
     return Not( value);
 });
 
-wrapper_operator.set('=', (  value)=>{
+wrapper_operator.set('eq', (  value)=>{
     return Equal( value);
 });
 
-wrapper_operator.set('<', (  value)=>{
+wrapper_operator.set('lt', (  value)=>{
     return LessThan( value);
 });
 
-wrapper_operator.set('<=', (  value)=>{
+wrapper_operator.set('lte', (  value)=>{
     return LessThanOrEqual( value);
 });
 
-wrapper_operator.set('>', (  value)=>{
+wrapper_operator.set('gt', (  value)=>{
     return MoreThan( value);
 });
 
-wrapper_operator.set('>=', (  value)=>{
+wrapper_operator.set('gte', (  value)=>{
     return MoreThanOrEqual( value);
 });
 
@@ -70,7 +70,7 @@ wrapper_operator.set('!end_with', (  value)=>{
     return Not( Like( `%${ value}`));
 });
 
-wrapper_operator.set('<>', (  value)=>{
+wrapper_operator.set('between', (  value)=>{
     let split = value.split('-');
     const [ from, to] = split;
     return Between( from, to);
@@ -115,15 +115,16 @@ function analyzeWhere ( query: any , columns: Array< string>, parser: TypeORMPar
     let { where} = query;
     let error = null;
     // me cuadra el formato: <columna>_<operator>=<value> ,ejemplo: name_startwith=ad
-    console.log( Array.from(wrapper_operator.keys()));
-    console.log( Array.from(wrapper_operator.keys()).length);
+    /*console.log( Array.from(wrapper_operator.keys()));
+    console.log( Array.from(wrapper_operator.keys()).length);*/
+    let operators = [ ...wrapper_operator.keys()];
     if( where){
         if( typeof( where) == 'string') {
             where = [where];
         }
         let hasInvalidColumns: boolean = false;
         let invalidColumns: Array< string> = [];
-        for(  const idx in where) {
+        /*for(  const idx in where) {
             const split = where[idx].split(':');
             if( split.length == 3) {
                 const [cl, operator, payload] = split;
@@ -138,7 +139,6 @@ function analyzeWhere ( query: any , columns: Array< string>, parser: TypeORMPar
                 }
             }
         }
-        
         if( hasInvalidColumns) {
             let message = 'where:column:notfound';
             
@@ -150,9 +150,37 @@ function analyzeWhere ( query: any , columns: Array< string>, parser: TypeORMPar
                         args: { columns: invalidColumns.join(',')}
                 }
         }
+        */
+        //console.log(`(?<column>\\w+)_(?<operator>${operators.join('|')})=(?<value>\\w+)`)
+        let reg = new RegExp(`^(?<column>\\w+)_(?<operator>${operators.join('|')})(=(?<value>\\w+))?$`,'i');
         
-    }
-    
+        for( let w of where) {
+            let match = w.match( reg);
+            if( match) {
+                const { column, operator, value} = match.groups;
+                console.log( column + ' '+operator +' '+value);
+                if( !columns.includes( column)) {
+                    error = {
+                        message: 'where:column:notfound',
+                        args: { column: column}
+                    }
+                    break;
+                } else if( value == undefined && operator != 'null')  {   
+                    error = {
+                        message: 'where:query:format:notvalid',
+                        args: {}
+                    }   
+                } else {
+                    parser.where[column] = wrapper_operator.get(operator)( value);
+                }
+            } else {
+                error = {
+                    message: 'where:query:format:notvalid',
+                    args: {}
+                }
+            }
+        }
+    }    
     return error;
 }
 
